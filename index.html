@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeepFaceLive</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', Arial, sans-serif;
+        }
+        
+        body {
+            background-color: #f9f9f9;
+            color: #030303;
+        }
+    
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo {
+            height: 24px;
+            margin-left: 16px;
+        }
+        
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .video-container {
+            width: 100%;
+            background-color: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .video-placeholder {
+            width: 100%;
+            height: 0;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            position: relative;
+            background-color: #222;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 24px;
+        }
+        
+        .deepfake-demo {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background: linear-gradient(135deg, #1e1e1e 0%, #3a3a3a 100%);
+        }
+        
+        .face-comparison {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: white;
+        }
+        
+        .face-circle {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid #ff0000;
+            margin: 10px;
+            box-shadow: 0 0 20px rgba(255,0,0,0.5);
+        }
+        
+        .face-circle img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .arrow {
+            font-size: 40px;
+            color: #ff0000;
+            margin: 0 20px;
+        }
+        
+        .video-info {
+            margin-bottom: 20px;
+        }
+        
+        .video-title {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .video-stats {
+            display: flex;
+            color: #606060;
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+        
+        .video-description {
+            background-color: #f2f2f2;
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .tutorial-steps {
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .step {
+            margin-bottom: 20px;
+        }
+        
+        .step-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 18px;
+        }
+        
+        .step-content {
+            padding-left: 16px;
+            line-height: 1.6;
+        }
+        
+        .code-block {
+            background-color: #f5f5f5;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        
+        .download-button {
+            display: inline-block;
+            background-color: #ff0000;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+            grid-row: 2;
+            grid-column: 1;
+            margin-left: 10px;
+        }
+        
+        .download-button:hover {
+            background-color: #cc0000;
+        }
+        
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        
+        .warning {
+            background-color: #fff8e1;
+            border-left: 4px solid #ffc107;
+            padding: 16px;
+            margin: 20px 0;
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .feature-card {
+            background-color: #f8f8f8;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ff0000;
+        }
+        
+        .feature-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #ff0000;
+        }
+
+        iframe {
+            border: none;
+            padding: 0;
+            margin: 0;
+            right: 0;
+            z-index: 0;
+            box-shadow: #000000 0 0 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 10px;
+            }
+            
+            .deepfake-demo {
+                flex-direction: column;
+            }
+            
+            .arrow {
+                transform: rotate(90deg);
+                margin: 20px 0;
+            }
+            
+            .face-circle {
+                width: 150px;
+                height: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div style="display: flex; justify-content: center; align-items: center; padding: 10px;">
+  <div style="position: relative; padding-bottom: 56.25%; width: 100%; max-width: 1160px; height: 0; overflow: hidden;">
+    <iframe src="https://www.youtube.com/embed/w0Wkhz4G6OA?si=_pQ-xw2CehWUnbY_&start=503"
+      title="YouTube video player"
+      style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      referrerpolicy="strict-origin-when-cross-origin"
+      allowfullscreen>
+    </iframe>
+  </div>
+</div>
+
+    <div class="main-container">
+        <div class="video-container">
+            <div class="deepfake-demo">
+                <div class="face-comparison">
+                    <h3>Wajah Asli</h3>
+                    <div class="face-circle">
+                        <img src="https://i.imgur.com/JqYeYnW.jpg" alt="Original Face">
+                    </div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="face-comparison">
+                    <h3>Hasil DeepFaceLive</h3>
+                    <div class="face-circle">
+                        <img src="https://i.imgur.com/mXJjZzP.jpg" alt="Deepfake Result">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="video-info">
+            <h1 class="video-title">Tutorial Lengkap Install DeepFaceLive - Deepfake Realtime</h1>
+            <div class="video-stats">
+                <span>850K ditonton</span> &bull; <span>1 bulan lalu</span>
+            </div>
+            <div class="video-description">
+                DeepFaceLive adalah aplikasi deepfake real-time yang memungkinkan Anda mengganti wajah secara langsung saat streaming atau video call. Aplikasi ini dikembangkan oleh Iperov, creator DeepFaceLab.
+            </div>
+        </div>
+        
+        <div class="tutorial-steps">
+            <div class="warning">
+                <strong>PERHATIAN:</strong> Teknologi ini hanya untuk tujuan edukasi dan hiburan. Penggunaan untuk penipuan atau konten ilegal adalah tindakan kriminal. Developer tidak bertanggung jawab atas penyalahgunaan.
+            </div>
+            
+            <div class="feature-list">
+                <div class="feature-card">
+                    <div class="feature-title">🔥 Fitur Unggulan</div>
+                    <p>Deepfake real-time dengan latency rendah</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-title">💻 Kompatibilitas</div>
+                    <p>Dukungan NVIDIA GPU dengan TensorRT</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-title">🔄 Sumber Terbuka</div>
+                    <p>Open-source di GitHub dengan update rutin</p>
+                </div>
+            </div>
+            
+            <div class="step">
+                <h3 class="step-title">Langkah 1: Persyaratan Sistem</h3>
+                <div class="step-content">
+                    <p>Pastikan sistem Anda memenuhi:</p>
+                    <ul>
+                        <li><strong>GPU:</strong> NVIDIA dengan 4GB+ VRAM (RTX series direkomendasikan)</li>
+                        <li><strong>CPU:</strong> Intel Core i5/i7/i9 atau AMD Ryzen 5/7/9</li>
+                        <li><strong>RAM:</strong> Minimal 8GB (16GB+ direkomendasikan)</li>
+                        <li><strong>OS:</strong> Windows 10/11 64-bit</li>
+                        <li><strong>Driver:</strong> NVIDIA driver terbaru dengan CUDA 11.3+</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="step">
+                <h3 class="step-title">Langkah 2: Download DeepFaceLive</h3>
+                <div class="step-content">
+                    <p>Download versi terbaru dari GitHub:</p>
+                    <div class="code-block">
+                        1. Kunjungi: https://github.com/iperov/DeepFaceLive<br>
+                        2. Klik "Code" → "Download ZIP"<br>
+                        3. Ekstrak file ZIP ke folder pilihan Anda
+                    </div>
+                    <p>Atau clone repository menggunakan Git:</p>
+                    <div class="code-block">
+                        git clone https://github.com/iperov/DeepFaceLive.git
+                    </div>
+                </div>
+            </div>
+            
+            <div class="step">
+                <h3 class="step-title">Langkah 3: Install Dependencies</h3>
+                <div class="step-content">
+                    <p>DeepFaceLive sudah termasuk semua dependencies yang diperlukan. Namun pastikan:</p>
+                    <ul>
+                        <li>Microsoft Visual C++ Redistributable terinstall</li>
+                        <li>NVIDIA CUDA Toolkit 11.3+ terinstall</li>
+                        <li>NVIDIA cuDNN 8.2+ terinstall</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="step">
+                <h3 class="step-title">Langkah 4: Menyiapkan Model</h3>
+                <div class="step-content">
+                    <p>Download model pretrained:</p>
+                    <div class="code-block">
+                        1. Buka folder "models" dalam direktori DeepFaceLive<br>
+                        2. Download model dari: https://github.com/iperov/DeepFaceLive<br>
+                        3. Letakkan file .dfm di folder "models"
+                    </div>
+                    <p>Model rekomendasi untuk pemula: "Celebrities" atau "Quick96"</p>
+                </div>
+            </div>
+            
+            <div class="step">
+                <h3 class="step-title">Langkah 5: Menjalankan Aplikasi</h3>
+                <div class="step-content">
+                    <p>Untuk memulai DeepFaceLive:</p>
+                    <div class="code-block">
+                        1. Buka folder DeepFaceLive<br>
+                        2. Jalankan file "DeepFaceLive.bat"<br>
+                        3. Pilih sumber video (webcam, video file, atau streaming)<br>
+                        4. Pilih model yang ingin digunakan<br>
+                        5. Atur parameter sesuai kebutuhan
+                    </div>
+                </div>
+            </div>
+            
+            <div class="step">
+                <h3 class="step-title">Langkah 6: Konfigurasi Lanjutan</h3>
+                <div class="step-content">
+                    <p>Tips untuk hasil terbaik:</p>
+                    <ul>
+                        <li>Gunakan pencahayaan yang baik pada wajah sumber</li>
+                        <li>Atur "Face Mask" untuk presisi yang lebih baik</li>
+                        <li>Gunakan "Sharpness" untuk meningkatkan detail</li>
+                        <li>Eksperimen dengan "Color Transfer" untuk pencocokan warna lebih alami</li>
+                    </ul>
+                </div>
+            </div>
+            <style>
+                a{
+                    box-shadow: #000000 0 0 10px;
+                    border: none;
+                    grid-row: 2;
+                }
+            </style>
+            
+            <div class="button-container">
+                <button class="download-button" onclick="window.open('https://github.com/iperov/DeepFaceLive', '_blank')">Download DeepFaceLive di GitHub</button>
+                <button class="download-button" onclick="window.open('https://mega.nz/folder/m10iELBK#Y0H6BflF9C4k_clYofC7yA', '_blank')">Download DeepFaceLive Mega</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
